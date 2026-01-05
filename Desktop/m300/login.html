@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Login | My Lawyer</title>
+  <style>
+    :root {
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --indigo-600: #4f46e5;
+      --error-bg: #fef2f2;
+      --error-text: #991b1b;
+      --success-bg: #f0fdf4;
+      --success-text: #166534;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: var(--slate-800);
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+    }
+
+    .auth-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 400px;
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    header { text-align: center; margin-bottom: 2rem; }
+    .brand-icon { font-size: 2rem; margin-bottom: 0.5rem; display: inline-block; }
+    h1 { font-size: 1.5rem; font-weight: 700; color: var(--slate-800); }
+    .muted { color: #64748b; font-size: 0.875rem; margin-top: 4px; }
+
+    .form-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+    .field-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    label { font-size: 0.875rem; font-weight: 600; color: var(--slate-700); }
+    
+    input {
+      padding: 0.75rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--indigo-600);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .btn-submit {
+      background: var(--slate-800);
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover { background: #000; }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    #statusFeedback {
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      display: none;
+    }
+
+    .err { background: var(--error-bg); color: var(--error-text); border: 1px solid #fecaca; }
+    .success { background: var(--success-bg); color: var(--success-text); border: 1px solid #bbf7d0; }
+
+    footer { margin-top: 2rem; text-align: center; font-size: 0.875rem; }
+    footer a { color: var(--indigo-600); text-decoration: none; font-weight: 500; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <main class="auth-card">
+    <header>
+      <span class="brand-icon">⚖️</span>
+      <h1>Client Login</h1>
+    
+    </header>
+
+    <div id="statusFeedback"></div>
+
+    <form id="loginForm">
+      <div class="form-stack">
+        <div class="field-group">
+
+          <label for="email">Email Address</label>
+          <input type="email" id="email" autocomplete="email" required placeholder="your@email.com">
+        </div>
+
+        <div class="field-group">
+          <label for="password">Password</label>
+
+          <input type="password" id="password" required>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">Sign In</button>
+      </div>
+    </form>
+
+    <footer>
+      <p><a href="signup.html">Create an account</a></p>
+      <div style="margin-top: 1rem;">
+        <a href="index.html" style="color: #94a3b8;">← Back to Homepage</a>
+      </div>
+    </footer>
+  </main>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    const form = document.getElementById('loginForm');
+    const feedback = document.getElementById('statusFeedback');
+    const btn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      feedback.style.display = 'none';
+
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, pass);
+        const userSnap = await getDoc(doc(db, 'users', cred.user.uid));
+
+        if (userSnap.exists() && userSnap.data().type === 'client') {
+          showFeedback('Login successful. Redirecting...', 'success');
+          setTimeout(() => window.location.href = 'dashboard.html', 800);
+        } else {
+          await auth.signOut();
+          showFeedback('Access denied. This is the client portal.', 'err');
+          resetBtn();
+        }
+      } catch (err) {
+        showFeedback('Invalid email or password.', 'err');
+        resetBtn();
+      }
+    });
+
+    function showFeedback(msg, type) {
+      feedback.textContent = msg;
+      feedback.className = type;
+      feedback.style.display = 'block';
+    }
+
+    function resetBtn() {
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  </script>
+</body>
+</html>
