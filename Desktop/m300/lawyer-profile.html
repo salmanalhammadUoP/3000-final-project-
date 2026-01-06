@@ -6,15 +6,15 @@
   <title>Lawyer Profile | My Lawyer</title>
   <style>
     :root {
-      --a: #1e293b;        /* Primary Dark */
-      --b: #334155;        /* Secondary Dark */
-      --c: #4f46e5;        /* Brand Indigo */
-      --err: #fef2f2;      /* Error Background */
-      --err-txt: #991b1b;  /* Error Text */
-      --true: #f0fdf4;     /* Success Background */
-      --true-txt: #166534; /* Success Text */
-      --muted: #94a3b8;    /* Muted Slate */
-      --star: #f39c12;     /* Gold for stars */
+      --a: #1e293b;    
+      --b: #334155;       
+      --c: #4f46e5;       
+      --err: #fef2f2;      
+      --err-txt: #991b1b;  
+      --true: #f0fdf4;     
+      --true-txt: #166534; 
+      --muted: #94a3b8;    
+      --star: #f39c12;     
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,7 +26,7 @@
       line-height: 1.6;
     }
 
-    /* Navigation */
+    
     nav {
       background: white;
       padding: 1rem 2rem;
@@ -53,7 +53,7 @@
 
     .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
 
-    /* Card Layout */
+    
     .profile-card {
       background: white;
       padding: 2rem;
@@ -106,7 +106,7 @@
       margin-top: 0.5rem;
     }
 
-    /* Consultation Box */
+  
     .rate-box {
       background: var(--a);
       padding: 1.5rem;
@@ -118,7 +118,7 @@
     .rate-box .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; margin-bottom: 0.25rem; }
     .rate-box .amount { font-size: 2rem; font-weight: 700; }
 
-    /* Section Styling */
+   
     .section { margin-bottom: 2rem; }
     .section h2 {
       font-size: 1.1rem;
@@ -130,7 +130,7 @@
     }
     .section p { font-size: 0.95rem; color: var(--b); }
 
-    /* Rating Form */
+   
     .rating-form {
       background: #f8fafc;
       padding: 1.5rem;
@@ -151,7 +151,7 @@
     }
     textarea:focus { outline: none; border-color: var(--c); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
 
-    /* Buttons */
+  
     .btn-submit-rating {
       padding: 0.6rem 1.25rem;
       background: var(--a); color: white;
@@ -168,12 +168,12 @@
     }
     .btn-consult:hover { opacity: 0.9; }
 
-    /* Alerts */
+  
     .alert { padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem; display: none; text-align: center; }
     .alert-success { background: var(--true); color: var(--true-txt); border: 1px solid #bbf7d0; }
     .alert-error { background: var(--err); color: var(--err-txt); border: 1px solid #fecaca; }
 
-    /* Reviews */
+   
     .review-item {
       background: #fdfdfd;
       padding: 1rem;
@@ -219,7 +219,7 @@
 
       <div class="rate-box">
         <div class="label">consultation rate</div>
-        <div class="amount" id="rate">$0/hour</div>
+        <div class="amount" id="rate">0/hour</div>
       </div>
 
       <div class="section">
@@ -237,18 +237,18 @@
           <span class="star" data-rating="4">★</span>
           <span class="star" data-rating="5">★</span>
         </div>
-        <textarea id="reviewText" placeholder="share your experience..."></textarea>
+        <textarea id="reviewText"></textarea>
         <button class="btn-submit-rating" id="submitRatingBtn" onclick="submitRating()">submit rating</button>
       </div>
 
       <div class="reviews-section">
         <div class="section"><h2>Client Reviews</h2></div>
         <div id="reviewsList">
-          <p style="color: var(--muted); text-align: center;">loading reviews...</p>
+          <p style="color: var(--muted); text-align: center;">loading reviews.</p>
         </div>
       </div>
 
-      <button class="btn-consult" onclick="startChat()">Start Consultation</button>
+      <button class="btn-consult" onclick="startChat()">start Consultation</button>
     </div>
   </div>
 
@@ -256,7 +256,7 @@
     import { auth, db } from './js/firebase.js';
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { doc, getDoc, updateDoc, collection, addDoc, query, orderBy, getDocs, where, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
+//by id
     const params = new URLSearchParams(window.location.search);
     const lawyerId = params.get('id');
     let lawyerData = null;
@@ -310,7 +310,7 @@
         if (!snap.empty) document.getElementById('ratingForm').style.display = 'none';
       } catch (e) {}
     }
-
+//ratings
     function displayRating(avg, total) {
       const stars = document.getElementById('starsDisplay');
       const text = document.getElementById('ratingText');
@@ -389,7 +389,7 @@
                 <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
                 <span class="review-date">${d}</span>
               </div>
-              <div class="review-text">${r.review || 'no comment provided'}</div>
+              <div class="review-text">${r.review || 'no comment'}</div>
             </div>`;
         });
         list.innerHTML = html;
@@ -402,7 +402,7 @@
       el.textContent = msg;
       el.style.display = 'block';
     }
-
+//msg
     window.startChat = function() {
       localStorage.setItem('selectedLawyer', JSON.stringify({ id: lawyerData.id, name: lawyerData.name }));
       window.location.href = 'chat.html';
