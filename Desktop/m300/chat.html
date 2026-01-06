@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat | MyLawyer</title>
+  <style>
+    :root {
+      --a: #1e293b;
+      --b: #334155;
+      --c: #4f46e5;
+      --d: #4338ca;
+      --err: #fef2f2;
+      --err-txt: #991b1b;
+      --true: #f0fdf4;
+      --true-txt: #166534;
+      --muted: #94a3b8;
+      --light: #f1f5f9;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: #f8fafc;
+      color: var(--a);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+ 
+    nav {
+      background: var(--a);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+
+      align-items: center;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .logo { font-size: 1.25rem; font-weight: 700; text-transform: lowercase; }
+
+    .nav-btn {
+      background: var(--b);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      text-transform: lowercase;
+    }
+    .nav-btn:hover { background: #475569; }
+
+
+    .container {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 1.5rem auto;
+      display: flex;
+
+      flex-direction: column;
+      padding: 0 1rem;
+      overflow: hidden; 
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--a);
+      margin-bottom: 1rem;
+
+      text-transform: lowercase;
+    }
+
+    .chat-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    #msg-list {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: white;
+    }
+
+    .msg {
+      padding: 10px 16px;
+      border-radius: 12px;
+      max-width: 75%;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .sent {
+      align-self: flex-end;
+      background: var(--c);
+
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+
+    .received {
+      align-self: flex-start;
+      background: var(--light);
+      color: var(--a);
+      border-bottom-left-radius: 2px;
+    }
+
+   
+    .input-area {
+      padding: 1.25rem;
+
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.95rem;
+      background: #fcfcfc;
+    }
+    input:focus { border-color: var(--c); }
+
+    .send-btn {
+      background: var(--a);
+      color: white;
+      border: none;
+      padding: 0 1.5rem;
+
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      text-transform: lowercase;
+      transition: background 0.2s;
+    }
+    .send-btn:hover { background: var(--c); }
+
+    .status-msg { text-align: center; color: var(--muted); font-size: 0.9rem; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">⚖️ mylawyer</div>
+    <button class="nav-btn" onclick="goBack()">back</button>
+  </nav>
+
+  <div class="container">
+    <header>
+      <h1 id="personName">loading...</h1>
+    </header>
+
+    <div class="chat-card">
+      <div id="msg-list">
+        <div class="status-msg">connecting to chat...</div>
+      </div>
+
+      <div class="input-area">
+        <input type="text" id="msgInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') send()">
+        <button class="send-btn" onclick="send()">send</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    let me, other, roomId, isLawyer = false;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = 'login.html'; return; }
+      me = user;
+
+      // user type
+      const uDoc = await getDoc(doc(db, 'users', user.uid));
+      isLawyer = uDoc.data()?.type === 'lawyer';
+
+      //  storage key based on role
+      const storageKey = isLawyer ? 'selectedClient' : 'selectedLawyer';
+      const storedData = localStorage.getItem(storageKey);
+      
+      if (!storedData) { goBack(); return; }
+      other = JSON.parse(storedData);
+      document.getElementById('personName').innerText = other.name.toLowerCase();
+
+      //room id
+      roomId = [me.uid, other.id].sort().join('_');
+      startChat();
+    });
+
+    function startChat() {
+      const q = query(collection(db, 'chats', roomId, 'messages'), orderBy('timestamp', 'asc'));
+      
+      onSnapshot(q, (snap) => {
+        const list = document.getElementById('msg-list');
+        list.innerHTML = '';
+        
+        if (snap.empty) {
+          list.innerHTML = '<div class="status-msg">no messages yet. say hi!</div>';
+        }
+
+        snap.forEach(d => {
+          const m = d.data();
+          const div = document.createElement('div');
+          div.className = `msg ${m.senderId === me.uid ? 'sent' : 'received'}`;
+          div.innerText = m.text;
+          list.appendChild(div);
+        });
+        list.scrollTop = list.scrollHeight;
+      });
+    }
+
+    window.send = async function() {
+      const input = document.getElementById('msgInput');
+      const txt = input.value.trim();
+      if (!txt) return;
+      
+      input.value = '';
+      
+      try {
+        //the msg
+        await addDoc(collection(db, 'chats', roomId, 'messages'), {
+          text: txt,
+          senderId: me.uid,
+          timestamp: serverTimestamp()
+        });
+
+        //inbox view
+        await setDoc(doc(db, 'chats', roomId), {
+          lastMessage: txt,
+          lastSenderId: me.uid,
+          lastUpdate: serverTimestamp(),
+          participants: [me.uid, other.id]
+        }, { merge: true });
+      } catch (e) {
+        console.error("Error sending:", e);
+      }
+    }
+
+    window.goBack = () => {
+      window.location.href = isLawyer ? 'lawyer-chats.html' : 'my-chats.html';
+    };
+  </script>
+</body>
+</html>
