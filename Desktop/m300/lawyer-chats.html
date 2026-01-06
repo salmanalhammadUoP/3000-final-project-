@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Client Inquiries | MyLawyer</title>
+  <style>
+    :root { --nav: #2c3e50; --red: #e74c3c; --bg: #f4f7f6; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
+    
+    nav { background: var(--nav); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; color: white; }
+    .back-btn { background: var(--red); color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+    .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+    .chat-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; }
+    
+    /* Professional Row Styling */
+    .chat-row { 
+      padding: 18px 25px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      cursor: pointer; 
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+    .chat-row:hover { background: #fcfcfc; }
+    .chat-row:last-child { border-bottom: none; }
+
+    .name { font-weight: 700; color: #333; margin-bottom: 4px; }
+    .preview { color: #777; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
+    .prefix-you { color: var(--nav); font-weight: 600; font-size: 12px; }
+
+    .new-indicator { background: var(--red); color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h2>Messages</h2>
+  <button class="back-btn" onclick="location.href='lawyer-dashboard.html'">Back</button>
+</nav>
+
+<div class="container">
+  <div class="chat-card" id="inboxList">
+    <p style="padding: 20px; text-align: center; color: #999;">Loading conversations...</p>
+  </div>
+</div>
+
+<script type="module">
+  import { db, auth } from './js/firebase.js';
+  import { collection, query, where, onSnapshot, getDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) syncInbox(user.uid);
+    else window.location.href = 'lawyer-login.html';
+  });
+
+  async function syncInbox(myId) {
+    const q = query(collection(db, 'chats'), where('participants', 'array-contains', myId));
+    
+    onSnapshot(q, async (snap) => {
+      const container = document.getElementById('inboxList');
+      if (snap.empty) {
+        container.innerHTML = '<div style="padding:40px; text-align:center;">No active inquiries yet.</div>';
+        return;
+      }
+
+      const chatPromises = snap.docs.map(async (d) => {
+        const data = d.data();
+        const otherId = data.participants.find(id => id !== myId);
+        const uSnap = await getDoc(doc(db, 'users', otherId));
+        return { 
+          id: otherId, 
+          name: uSnap.exists() ? uSnap.data().name : "Client", 
+          ...data 
+        };
+      });
+
+      const items = await Promise.all(chatPromises);
+      
+      // Sort by the 'lastUpdate' timestamp we added in the chat script
+      items.sort((a, b) => (b.lastUpdate?.seconds || 0) - (a.lastUpdate?.seconds || 0));
+
+      container.innerHTML = items.map(item => {
+        const isSentByMe = item.lastSenderId === myId;
+        return `
+          <div class="chat-row" onclick="openChat('${item.id}', '${item.name}')">
+            <div>
+              <div class="name">${item.name}</div>
+              <div class="preview">
+                ${isSentByMe ? '<span class="prefix-you">You:</span> ' : ''}
+                ${item.lastMessage || 'Sent a message'}
+              </div>
+            </div>
+            ${(!isSentByMe && item.lastMessage) ? '<div class="new-indicator">NEW</div>' : ''}
+          </div>
+        `;
+      }).join('');
+    });
+  }
+
+  window.openChat = (id, name) => {
+    localStorage.setItem('selectedClient', JSON.stringify({id, name}));
+    window.location.href = 'chat.html';
+  };
+</script>
+</body>
+</html>

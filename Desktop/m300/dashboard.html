@@ -279,10 +279,12 @@
 
       let list = allLawyers.filter(l =>
         (l.name || '').toLowerCase().includes(search) &&
+
         (spec === '' || l.specialization === spec)
       );
 
       if (sort === 'high') list.sort((a,b)=> (b.rating||0)-(a.rating||0));
+      
       if (sort === 'low') list.sort((a,b)=> (a.rate||0)-(b.rate||0));
 
       render(list);

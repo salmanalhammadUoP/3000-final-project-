@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Client Signup | My Lawyer</title>
+  <title>Create Lawyer Account | My Lawyer</title>
   <style>
     :root {
-      --a: #1e293b;      
+      --a: #1e293b;    
       --b: #334155;        
       --c: #4f46e5;       
-      --err: #fef2f2;     
+      --err: #fef2f2;    
       --err-txt: #991b1b;  
       --true: #f0fdf4;     
-      --true-txt: #166534; 
+      --true-txt: #166534;
       --muted: #94a3b8;   
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
@@ -23,7 +22,6 @@
       background-color: #f8fafc;
       color: var(--a);
       display: grid;
-
       place-items: center;
       min-height: 100vh;
       padding: 2rem 1rem;
@@ -32,7 +30,7 @@
     .auth-card {
       background: #ffffff;
       width: 100%;
-      max-width: 400px;
+      max-width: 500px;
       padding: 2.5rem;
       border-radius: 12px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
@@ -41,23 +39,24 @@
 
     header { text-align: center; margin-bottom: 2rem; }
     .brand-icon { font-size: 2rem; margin-bottom: 0.5rem; display: inline-block; }
-
     h1 { font-size: 1.5rem; font-weight: 700; color: var(--a); text-transform: lowercase; }
-    .form-stack { display: flex; flex-direction: column; gap: 1.25rem; }
 
-    .field-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+    .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     
     label { font-size: 0.875rem; font-weight: 600; color: var(--b); }
     
-    input {
+    input, select, textarea {
       padding: 0.75rem 1rem;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       transition: all 0.2s ease;
+      font-family: inherit;
     }
 
-    input:focus {
+    input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--c);
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
@@ -66,20 +65,17 @@
     .btn-submit {
       background: var(--a);
       color: white;
-      padding: 0.75rem;
-
+      padding: 0.85rem;
       border: none;
       border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
-
       margin-top: 0.5rem;
       transition: background 0.2s;
       text-transform: lowercase;
     }
 
     .btn-submit:hover { background: #000; }
-
     .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
     #statusFeedback {
@@ -95,9 +91,12 @@
     .success { background: var(--true); color: var(--true-txt); border: 1px solid #bbf7d0; }
 
     footer { margin-top: 2rem; text-align: center; font-size: 0.875rem; }
-
     footer a { color: var(--c); text-decoration: none; font-weight: 500; }
     footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .field-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -105,21 +104,21 @@
   <main class="auth-card">
     <header>
       <span class="brand-icon">⚖️</span>
-      <h1>client signup</h1>
+      <h1>lawyer sign up</h1>
     </header>
 
     <div id="statusFeedback"></div>
 
-    <form id="signupForm">
+    <form id="registrationForm">
       <div class="form-stack">
         <div class="field-group">
-          <label for="name">Full name</label>
+          <label for="name">Full Name</label>
           <input type="text" id="name" required>
         </div>
 
         <div class="field-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" autocomplete="email" required>
+          <label for="email">Work Email</label>
+          <input type="email" id="email" required>
         </div>
 
         <div class="field-group">
@@ -127,14 +126,47 @@
           <input type="password" id="password" minlength="6" required>
         </div>
 
-        <button type="submit" class="btn-submit" id="submitBtn">sign up</button>
+        <div class="field-group">
+          <label for="specialization">Specialization</label>
+          <select id="specialization" required>
+            <option value="">Select Area...</option>
+            <option value="Family Law">Family Law</option>
+            <option value="Criminal Law">Criminal Law</option>
+            <option value="Corporate Law">Corporate Law</option>
+            <option value="Real Estate">Real Estate</option>
+            <option value="Immigration">Immigration</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="barLicense">bar license</label>
+            <input type="text" id="barLicense" required>
+          </div>
+          <div class="field-group">
+            <label for="experience">experience yrs</label>
+            <input type="number" id="experience" min="0" required>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="rate">Hourly rate</label>
+          <input type="number" id="rate" min="0" step="10" required placeholder="150">
+        </div>
+
+        <div class="field-group">
+          <label for="bio">Bio</label>
+          <textarea id="bio" rows="3" placeholder="bio"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">create account</button>
       </div>
     </form>
 
     <footer>
-      <p><a href="login.html">Login</a></p>
+      <p><a href="lawyer-login.html">Sign in</a></p>
       <div style="margin-top: 1rem;">
-        <a href="index.html" style="color: var(--muted);">← Back to Homepage</a>
+        <a href="index.html" style="color: var(--muted);">← Back to homepage</a>
       </div>
     </footer>
   </main>
@@ -144,42 +176,47 @@
     import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-    const form = document.getElementById('signupForm');
+    const form = document.getElementById('registrationForm');
     const feedback = document.getElementById('statusFeedback');
     const btn = document.getElementById('submitBtn');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
+      const pass = document.getElementById('password').value;
+      const email = document.getElementById('email').value.trim().toLowerCase();
+
       setLoading(true);
       feedback.style.display = 'none';
-
-      const name = document.getElementById('name').value.trim();
-
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const pass = document.getElementById('password').value;
 
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
         
         await setDoc(doc(db, 'users', cred.user.uid), {
           uid: cred.user.uid,
-          name: name,
+          name: document.getElementById('name').value.trim(),
           email: email,
-          type: 'client',
+          type: 'lawyer',
+          specialization: document.getElementById('specialization').value,
+
+          barLicense: document.getElementById('barLicense').value.trim(),
+
+          experience: parseInt(document.getElementById('experience').value),
+          rate: parseInt(document.getElementById('rate').value),
+
+          bio: document.getElementById('bio').value.trim() || 'no bio provided.',
+          rating: 0,
+          totalRatings: 0,
           createdAt: serverTimestamp()
         });
 
-        showFeedback('account created redirecting', 'success');
-        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+        showFeedback('Account created redirecting...', 'success');
+        setTimeout(() => window.location.href = 'lawyer-dashboard.html', 1200);
 
       } catch (err) {
         console.error(err);
-        let msg = 'Error creating account please try again.';
-
-        if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered.';
-        if (err.code === 'auth/weak-password') msg = 'Password should be at least 6 characters.';
-        
+        let msg = 'Error creating account. Please try again.';
+        if (err.code === 'auth/email-already-in-use') msg = 'email is already in use.';
         showFeedback(msg, 'err');
         setLoading(false);
       }
@@ -187,15 +224,13 @@
 
     function showFeedback(msg, type) {
       feedback.textContent = msg;
-
       feedback.className = type;
       feedback.style.display = 'block';
     }
 
     function setLoading(isLoading) {
       btn.disabled = isLoading;
-
-      btn.textContent = isLoading ? 'creating account' : 'sign up';
+      btn.textContent = isLoading ? 'creating account' : 'create account';
     }
   </script>
 </body>
