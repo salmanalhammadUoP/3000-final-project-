@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lawyer Profile | My Lawyer</title>
+  <style>
+    :root {
+      --a: #1e293b;        /* Primary Dark */
+      --b: #334155;        /* Secondary Dark */
+      --c: #4f46e5;        /* Brand Indigo */
+      --err: #fef2f2;      /* Error Background */
+      --err-txt: #991b1b;  /* Error Text */
+      --true: #f0fdf4;     /* Success Background */
+      --true-txt: #166534; /* Success Text */
+      --muted: #94a3b8;    /* Muted Slate */
+      --star: #f39c12;     /* Gold for stars */
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Inter', -apple-system, sans-serif; 
+      background: #f8fafc; 
+      color: var(--a);
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    nav {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size: 1.25rem; font-weight: 800; color: var(--a); cursor: pointer; }
+    .btn-back {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--b);
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { background: #f1f5f9; }
+
+    .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+
+    /* Card Layout */
+    .profile-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
+    }
+
+    .profile-header {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 100px; height: 100px;
+      background: var(--a);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .profile-main h1 { font-size: 1.75rem; font-weight: 800; color: var(--a); margin-bottom: 0.25rem; }
+    .badge {
+      display: inline-block;
+      background: #eef2ff;
+      color: var(--c);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .rating-section { margin: 0.5rem 0; }
+    .stars-display { font-size: 1.25rem; color: var(--star); }
+    .rating-text { color: var(--muted); font-size: 0.85rem; }
+
+    .credentials {
+      display: flex; gap: 1rem;
+      font-size: 0.85rem; color: var(--b);
+      margin-top: 0.5rem;
+    }
+
+    /* Consultation Box */
+    .rate-box {
+      background: var(--a);
+      padding: 1.5rem;
+      border-radius: 10px;
+      text-align: center;
+      margin: 2rem 0;
+      color: white;
+    }
+    .rate-box .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; margin-bottom: 0.25rem; }
+    .rate-box .amount { font-size: 2rem; font-weight: 700; }
+
+    /* Section Styling */
+    .section { margin-bottom: 2rem; }
+    .section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--a);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .section p { font-size: 0.95rem; color: var(--b); }
+
+    /* Rating Form */
+    .rating-form {
+      background: #f8fafc;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      border: 1px solid #e2e8f0;
+    }
+    .star-rating { font-size: 2rem; color: #cbd5e1; cursor: pointer; margin-bottom: 1rem; }
+    .star-rating .star.active { color: var(--star); }
+    
+    textarea {
+      width: 100%; padding: 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-family: inherit;
+      min-height: 80px;
+      margin-bottom: 1rem;
+    }
+    textarea:focus { outline: none; border-color: var(--c); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+    /* Buttons */
+    .btn-submit-rating {
+      padding: 0.6rem 1.25rem;
+      background: var(--a); color: white;
+      border: none; border-radius: 6px;
+      font-weight: 600; cursor: pointer; font-size: 0.85rem;
+    }
+    .btn-consult {
+      width: 100%; padding: 1rem;
+      background: var(--c); color: white;
+      border: none; border-radius: 8px;
+      font-size: 1rem; font-weight: 600;
+      cursor: pointer; margin-top: 1rem;
+      transition: opacity 0.2s;
+    }
+    .btn-consult:hover { opacity: 0.9; }
+
+    /* Alerts */
+    .alert { padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem; display: none; text-align: center; }
+    .alert-success { background: var(--true); color: var(--true-txt); border: 1px solid #bbf7d0; }
+    .alert-error { background: var(--err); color: var(--err-txt); border: 1px solid #fecaca; }
+
+    /* Reviews */
+    .review-item {
+      background: #fdfdfd;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 1px solid #f1f5f9;
+    }
+    .review-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .review-stars { color: var(--star); font-size: 0.9rem; }
+    .review-date { color: var(--muted); font-size: 0.75rem; }
+    .review-text { font-size: 0.9rem; color: var(--b); }
+
+    @media (max-width: 600px) {
+      .profile-header { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo" onclick="goBack()">MyLawyer</div>
+    <button class="btn-back" onclick="goBack()">← Back</button>
+  </nav>
+
+  <div class="container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar" id="avatar">
+          <span id="avatarInitial">L</span>
+        </div>
+        <div class="profile-main">
+          <h1 id="name">loading...</h1>
+          <span class="badge" id="specialization">loading...</span>
+          <div class="rating-section">
+            <div class="stars-display" id="starsDisplay">☆☆☆☆☆</div>
+            <div class="rating-text" id="ratingText">no ratings yet</div>
+          </div>
+          <div class="credentials">
+            <span>license: <strong id="barLicense">-</strong></span>
+            <span>experience: <strong id="experience">-</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rate-box">
+        <div class="label">consultation rate</div>
+        <div class="amount" id="rate">$0/hour</div>
+      </div>
+
+      <div class="section">
+        <h2>About</h2>
+        <p id="bio">loading...</p>
+      </div>
+      
+      <div class="rating-form" id="ratingForm">
+        <h2 style="font-size: 1rem; margin-bottom: 1rem;">Rate This Lawyer</h2>
+        <div id="alert" class="alert"></div>
+        <div class="star-rating" id="starRating">
+          <span class="star" data-rating="1">★</span>
+          <span class="star" data-rating="2">★</span>
+          <span class="star" data-rating="3">★</span>
+          <span class="star" data-rating="4">★</span>
+          <span class="star" data-rating="5">★</span>
+        </div>
+        <textarea id="reviewText" placeholder="share your experience..."></textarea>
+        <button class="btn-submit-rating" id="submitRatingBtn" onclick="submitRating()">submit rating</button>
+      </div>
+
+      <div class="reviews-section">
+        <div class="section"><h2>Client Reviews</h2></div>
+        <div id="reviewsList">
+          <p style="color: var(--muted); text-align: center;">loading reviews...</p>
+        </div>
+      </div>
+
+      <button class="btn-consult" onclick="startChat()">Start Consultation</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { doc, getDoc, updateDoc, collection, addDoc, query, orderBy, getDocs, where, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    const params = new URLSearchParams(window.location.search);
+    const lawyerId = params.get('id');
+    let lawyerData = null;
+    let currentUser = null;
+    let selectedRating = 0;
+    let hasUserRated = false;
+
+    if (!lawyerId) {
+      window.location.href = 'dashboard.html';
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        await loadProfile();
+        await checkIfUserRated();
+        await loadReviews();
+        setupStarRating();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    async function loadProfile() {
+      try {
+        const docSnap = await getDoc(doc(db, 'users', lawyerId));
+        if (docSnap.exists()) {
+          lawyerData = { id: lawyerId, ...docSnap.data() };
+          document.getElementById('name').textContent = lawyerData.name.toLowerCase();
+          document.getElementById('specialization').textContent = lawyerData.specialization;
+          document.getElementById('barLicense').textContent = lawyerData.barLicense;
+          document.getElementById('experience').textContent = lawyerData.experience + ' years';
+          document.getElementById('rate').textContent = '$' + lawyerData.rate + '/hour';
+          document.getElementById('bio').textContent = lawyerData.bio || 'experienced legal professional ready to help.';
+          
+          if (lawyerData.profilePicture) {
+            document.getElementById('avatar').innerHTML = `<img src="${lawyerData.profilePicture}" alt="Profile">`;
+          } else {
+            document.getElementById('avatarInitial').textContent = lawyerData.name.charAt(0).toUpperCase();
+          }
+          
+          displayRating(lawyerData.rating || 0, lawyerData.totalRatings || 0);
+        }
+      } catch (error) { console.error(error); }
+    }
+
+    async function checkIfUserRated() {
+      try {
+        const q = query(collection(db, 'users', lawyerId, 'reviews'), where('userId', '==', currentUser.uid), limit(1));
+        const snap = await getDocs(q);
+        if (!snap.empty) document.getElementById('ratingForm').style.display = 'none';
+      } catch (e) {}
+    }
+
+    function displayRating(avg, total) {
+      const stars = document.getElementById('starsDisplay');
+      const text = document.getElementById('ratingText');
+      const rounded = Math.round(avg);
+      stars.textContent = '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+      text.textContent = total > 0 ? `${avg.toFixed(1)} / 5 (${total} ratings)` : 'no ratings yet';
+    }
+
+    function setupStarRating() {
+      const stars = document.querySelectorAll('.star');
+      stars.forEach(star => {
+        star.addEventListener('click', function() {
+          selectedRating = parseInt(this.dataset.rating);
+          updateStarDisplay();
+        });
+        star.addEventListener('mouseover', function() {
+          const rating = parseInt(this.dataset.rating);
+          stars.forEach((s, i) => s.classList.toggle('active', i < rating));
+        });
+      });
+      document.getElementById('starRating').addEventListener('mouseout', updateStarDisplay);
+    }
+
+    function updateStarDisplay() {
+      const stars = document.querySelectorAll('.star');
+      stars.forEach((star, i) => star.classList.toggle('active', i < selectedRating));
+    }
+
+    window.submitRating = async function() {
+      if (selectedRating === 0) { showAlert('please select stars', 'error'); return; }
+      const btn = document.getElementById('submitRatingBtn');
+      btn.disabled = true;
+      btn.textContent = 'submitting...';
+      
+      try {
+        await addDoc(collection(db, 'users', lawyerId, 'reviews'), {
+          rating: selectedRating,
+          review: document.getElementById('reviewText').value.trim(),
+          userId: currentUser.uid,
+          createdAt: new Date().toISOString()
+        });
+        
+        const newTotal = (lawyerData.totalRatings || 0) + 1;
+        const newAvg = (((lawyerData.rating || 0) * (lawyerData.totalRatings || 0)) + selectedRating) / newTotal;
+        
+        await updateDoc(doc(db, 'users', lawyerId), { rating: newAvg, totalRatings: newTotal });
+        
+        showAlert('thank you for your rating', 'success');
+        setTimeout(() => document.getElementById('ratingForm').style.display = 'none', 1500);
+        await loadProfile();
+        await loadReviews();
+      } catch (e) { 
+        showAlert('error submitting', 'error');
+        btn.disabled = false;
+      }
+    }
+
+    async function loadReviews() {
+      try {
+        const q = query(collection(db, 'users', lawyerId, 'reviews'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        const list = document.getElementById('reviewsList');
+        
+        if (snap.empty) {
+          list.innerHTML = '<p style="color: var(--muted); text-align: center; font-size: 0.9rem;">no reviews yet.</p>';
+          return;
+        }
+
+        let html = '';
+        snap.forEach(doc => {
+          const r = doc.data();
+          const d = new Date(r.createdAt).toLocaleDateString();
+          html += `
+            <div class="review-item">
+              <div class="review-header">
+                <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                <span class="review-date">${d}</span>
+              </div>
+              <div class="review-text">${r.review || 'no comment provided'}</div>
+            </div>`;
+        });
+        list.innerHTML = html;
+      } catch (e) {}
+    }
+
+    function showAlert(msg, type) {
+      const el = document.getElementById('alert');
+      el.className = `alert alert-${type}`;
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    window.startChat = function() {
+      localStorage.setItem('selectedLawyer', JSON.stringify({ id: lawyerData.id, name: lawyerData.name }));
+      window.location.href = 'chat.html';
+    }
+
+    window.goBack = function() { window.location.href = 'dashboard.html'; }
+  </script>
+</body>
+</html>
