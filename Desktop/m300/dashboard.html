@@ -4,110 +4,115 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Find Lawyers | My Lawyer</title>
+
   <style>
-    
     :root {
-      --slate-800: #1e293b;
-      --slate-700: #334155;
-      --slate-600: #475569;
-      --indigo-600: #4f46e5;
-      --indigo-700: #4338ca;
-      --error-bg: #fef2f2;
-      --error-text: #991b1b;
-      --success-text: #166534;
-      --slate-400: #94a3b8;
-      --slate-100: #f1f5f9;
+      --a: #1e293b;
+      --b: #334155;
+      --c: #4f46e5;
+      --d: #4338ca;
+      --err: #fef2f2;
+      --err-txt: #991b1b;
+      --true: #f0fdf4;
+      --true-txt: #166534;
+      --muted: #94a3b8;
+      --light: #f1f5f9;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #f8fafc;
 
-      color: var(--slate-800);
+      color: var(--a);
       min-height: 100vh;
     }
+
     nav {
-      background: var(--slate-800);
+      background: var(--a);
       padding: 1rem 2rem;
       display: flex;
+
       justify-content: space-between;
       align-items: center;
       color: white;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .logo { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+    .logo { font-size: 1.25rem; font-weight: 700; display: flex; gap: 8px; }
     .nav-right { display: flex; gap: 12px; }
-    
+
     .nav-btn {
-      background: var(--slate-700);
+      background: var(--b);
       color: white;
       border: none;
+
       padding: 0.6rem 1.2rem;
       border-radius: 6px;
       cursor: pointer;
+
       font-size: 0.875rem;
-      font-weight: 500;
-      transition: background 0.2s;
     }
-    .nav-btn:hover { background: var(--slate-600); }
+    .nav-btn:hover { background: #475569; }
 
     .logout-btn {
       background: transparent;
       color: #fda4af;
+
       border: 1px solid #fda4af;
       padding: 0.6rem 1.2rem;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.875rem;
-      transition: all 0.2s;
     }
-    .logout-btn:hover { background: #fee2e2; color: #991b1b; border-color: transparent; }
+    .logout-btn:hover {
+      background: var(--err);
+      color: var(--err-txt);
+      border-color: transparent;
+    }
 
-   
     .container {
       max-width: 1200px;
       margin: 2rem auto;
       padding: 0 1.5rem;
     }
 
-    header.dashboard-header {
-      margin-bottom: 2.5rem;
-      text-align: left;
-    }
-    header.dashboard-header h1 { font-size: 1.875rem; font-weight: 800; color: var(--slate-800); }
-    header.dashboard-header p { color: var(--slate-600); margin-top: 0.5rem; }
+    header h1 {
+      font-size: 1.875rem;
+      font-weight: 800;
 
-    /* fltrs */
+      color: var(--a);
+    }
+
     .controls {
       background: white;
       padding: 1.5rem;
       border-radius: 12px;
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
+
       gap: 1rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       margin-bottom: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
     }
 
-    .controls input, .controls select {
-      width: 100%;
+    .controls input,
+    .controls select {
       padding: 0.75rem 1rem;
       border: 1px solid #e2e8f0;
+
       border-radius: 8px;
       font-size: 0.95rem;
-      background-color: #fff;
-      transition: all 0.2s;
     }
 
-    .controls input:focus, .controls select:focus {
+    .controls input:focus,
+    .controls select:focus {
+
       outline: none;
-      border-color: var(--indigo-600);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      border-color: var(--c);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
     }
 
-    
     .lawyers-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -118,93 +123,90 @@
       background: white;
       border-radius: 12px;
       padding: 1.5rem;
+
       border: 1px solid #e2e8f0;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      position: relative;
+      transition: all 0.3s;
     }
 
     .lawyer-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1);
-      border-color: var(--indigo-600);
+      border-color: var(--c);
     }
 
     .card-header {
+
       display: flex;
       align-items: center;
       gap: 1rem;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
     }
 
     .avatar {
       width: 56px;
       height: 56px;
-      background: var(--slate-100);
-      color: var(--slate-800);
+      background: var(--light);
+      color: var(--a);
+
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+
       font-weight: 700;
-      border: 2px solid #fff;
-      box-shadow: 0 0 0 2px var(--indigo-600);
+      box-shadow: 0 0 0 2px var(--c);
     }
 
-    .lawyer-card h3 { font-size: 1.125rem; font-weight: 700; color: var(--slate-800); }
     .badge {
       font-size: 0.75rem;
       background: #eef2ff;
-      color: var(--indigo-600);
+      color: var(--c);
+
       padding: 0.25rem 0.75rem;
       border-radius: 9999px;
       font-weight: 600;
-      display: inline-block;
     }
 
-    .stats-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 1rem 0;
-      padding: 0.75rem 0;
-      border-top: 1px solid #f1f5f9;
-      border-bottom: 1px solid #f1f5f9;
+    .stars { color: #f59e0b; margin-bottom: 0.5rem; }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
     }
 
-    .stat-item { display: flex; flex-direction: column; }
-    .stat-label { font-size: 0.7rem; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-value { font-size: 0.9rem; font-weight: 600; color: var(--slate-700); }
+    .stat-value {
+      font-size: 0.9rem;
+      font-weight: 600;
 
-    .stars { color: #f59e0b; font-size: 0.875rem; display: flex; align-items: center; gap: 4px; }
+      color: var(--b);
+    }
 
     .price-tag {
       font-size: 1.25rem;
       font-weight: 800;
-      color: var(--slate-800);
+      color: var(--a);
       margin-bottom: 1rem;
     }
-    .price-tag span { font-size: 0.875rem; color: var(--slate-400); font-weight: 400; }
 
     .btn-view {
-      background: var(--slate-800);
+      background: var(--a);
       color: white;
       border: none;
       padding: 0.75rem;
       border-radius: 8px;
+
       font-weight: 600;
       cursor: pointer;
       width: 100%;
-      transition: background 0.2s;
     }
-    .btn-view:hover { background: var(--indigo-600); }
+
+    .btn-view:hover { background: var(--c); }
 
     .status-msg {
-      grid-column: 1 / -1;
       text-align: center;
       padding: 4rem;
-      color: var(--slate-400);
+      color: var(--muted);
     }
 
     @media (max-width: 768px) {
@@ -212,8 +214,8 @@
     }
   </style>
 </head>
-<body>
 
+<body>
   <nav>
     <div class="logo">⚖️ MyLawyer</div>
     <div class="nav-right">
@@ -223,13 +225,12 @@
   </nav>
 
   <div class="container">
-    <header class="dashboard-header">
+    <header>
       <h1>Find Your Lawyer</h1>
     </header>
 
     <section class="controls">
       <input type="text" id="searchInput" placeholder="Search by name..." oninput="updateList()">
-      
       <select id="specFilter" onchange="updateList()">
         <option value="">All Specializations</option>
         <option value="Family Law">Family Law</option>
@@ -239,7 +240,6 @@
         <option value="Immigration">Immigration</option>
         <option value="Employment">Employment</option>
       </select>
-
       <select id="sortOrder" onchange="updateList()">
         <option value="none">Sort by...</option>
         <option value="high">Highest Rated</option>
@@ -248,7 +248,7 @@
     </section>
 
     <div id="lawyersGrid" class="lawyers-grid">
-      <div class="status-msg">Loading verified professionals...</div>
+      <div class="status-msg">Loading </div>
     </div>
   </div>
 
@@ -260,107 +260,57 @@
     let allLawyers = [];
 
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        await loadLawyers();
-      } else {
-        window.location.href = 'login.html';
-      }
+      if (user) loadLawyers();
+      else location.href = 'login.html';
     });
 
     async function loadLawyers() {
-      try {
-        const lawyerQuery = query(collection(db, 'users'), where('type', '==', 'lawyer'));
-        const querySnapshot = await getDocs(lawyerQuery);
-        
-        allLawyers = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        updateList();
-      } catch (err) {
-        //incase errr
-        console.error("Error loading lawyers:", err);
-        document.getElementById('lawyersGrid').innerHTML = '<div class="status-msg">Failed to load profiles. Please refresh.</div>';
-      }
+      const q = query(collection(db, 'users'), where('type', '==', 'lawyer'));
+      const snap = await getDocs(q);
+      allLawyers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      updateList();
     }
 
-    window.updateList = function() {
-      const searchValue = document.getElementById('searchInput').value.toLowerCase();
-      const specValue = document.getElementById('specFilter').value;
-      const sortValue = document.getElementById('sortOrder').value;
+    window.updateList = () => {
+      const search = searchInput.value.toLowerCase();
+      const spec = specFilter.value;
 
-      let filtered = allLawyers.filter(l => {
-        const nameMatch = (l.name || "").toLowerCase().includes(searchValue);
-        const specMatch = specValue === "" || l.specialization === specValue;
-        return nameMatch && specMatch;
-      });
+      const sort = sortOrder.value;
 
-      if (sortValue === "high") {
-        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      } else if (sortValue === "low") {
-        filtered.sort((a, b) => (a.rate || 0) - (b.rate || 0));
-      }
+      let list = allLawyers.filter(l =>
+        (l.name || '').toLowerCase().includes(search) &&
+        (spec === '' || l.specialization === spec)
+      );
 
-      render(filtered);
-    }
+      if (sort === 'high') list.sort((a,b)=> (b.rating||0)-(a.rating||0));
+      if (sort === 'low') list.sort((a,b)=> (a.rate||0)-(b.rate||0));
+
+      render(list);
+    };
 
     function render(list) {
-      const grid = document.getElementById('lawyersGrid');
-      
-      if (list.length === 0) {
-        grid.innerHTML = '<div class="status-msg">no lawyers found</div>';
-        return;
-      }
-
-      grid.innerHTML = list.map(l => {
-        const rawRating = l.rating || 0;
-        const formattedRating = Number(rawRating).toFixed(1);
-        const starCount = Math.min(Math.max(Math.round(rawRating), 0), 5);
-        const stars = '★'.repeat(starCount) + '☆'.repeat(5 - starCount);
-        
-        return `
+      lawyersGrid.innerHTML = list.length
+        ? list.map(l => `
           <div class="lawyer-card">
             <div class="card-header">
-              <div class="avatar">${(l.name || "U").charAt(0).toUpperCase()}</div>
+              <div class="avatar">${(l.name||'U')[0].toUpperCase()}</div>
               <div>
+
                 <h3>${l.name || 'Anonymous Lawyer'}</h3>
                 <span class="badge">${l.specialization || 'General Practice'}</span>
               </div>
             </div>
-            
-            <div class="stars">
-              ${stars} <span>(${formattedRating})</span>
-            </div>
- <!-- Experience and location info -->
-            <div class="stats-row">
-              <div class="stat-item">
-                <span class="stat-label">Experience</span>
-                <span class="stat-value">${l.experience || 0} years</span>
-              </div>
-              <div class="stat-item" style="text-align: right;">
-                <span class="stat-label">Location</span>
-                <span class="stat-value">Remote / Office</span>
-              </div>
-            </div>
-
-            <div class="price-tag">$${l.rate || 0} <span>/ hour</span></div>
-
-            <button class="btn-view" onclick="location.href='lawyer-profile.html?id=${l.id}'">
-              View Profile
-            </button>
+            <div class="stars">${'★'.repeat(Math.round(l.rating||0))}</div>
+            <div class="price-tag">$${l.rate || 0} / hour</div>
+            <button class="btn-view" onclick="location.href='lawyer-profile.html?id=${l.id}'">View Profile</button>
           </div>
-        `;
-      }).join('');
+        `).join('')
+        : '<div class="status-msg">No lawyers found</div>';
     }
 
     window.handleLogout = async () => {
-      try {
-        await signOut(auth);
-        window.location.href = 'index.html';
-      } catch (error) {
-        alert('Error logging out.');
-      }
+      await signOut(auth);
+      location.href = 'index.html';
     };
   </script>
 </body>
