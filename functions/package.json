@@ -1,0 +1,12 @@
+{
+  "name": "functions",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-functions": "^7.2.5",
+    "stripe": "^14.0.0"
+  }
+}

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat | MyLawyer</title>
+  <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+  <style>
+    :root {
+      --a: #1e293b;
+      --b: #334155;
+      --c: #4f46e5;
+      --d: #4338ca;
+      --err: #fef2f2;
+      --err-txt: #991b1b;
+      --true: #f0fdf4;
+      --true-txt: #166534;
+      --muted: #94a3b8;
+      --light: #f1f5f9;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: #f8fafc;
+      color: var(--a);
+      height: 100vh;
+
+      display: flex;
+      flex-direction: column;
+    }
+
+ 
+    nav {
+      background: var(--a);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+
+      align-items: center;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .logo { font-size: 1.25rem; font-weight: 700; text-transform: lowercase; }
+
+    .nav-btn {
+      background: var(--b);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      text-transform: lowercase;
+    }
+    .nav-btn:hover { background: #475569; }
+
+
+    .container {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 1.5rem auto;
+      display: flex;
+
+      flex-direction: column;
+      padding: 0 1rem;
+      overflow: hidden; 
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--a);
+      margin-bottom: 1rem;
+
+      text-transform: lowercase;
+    }
+
+    .chat-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    #msg-list {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: white;
+    }
+
+    .msg {
+      padding: 10px 16px;
+      border-radius: 12px;
+      max-width: 75%;
+
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .sent {
+      align-self: flex-end;
+      background: var(--c);
+
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+
+    .received {
+      align-self: flex-start;
+      background: var(--light);
+      color: var(--a);
+      border-bottom-left-radius: 2px;
+    }
+
+   
+    .input-area {
+      padding: 1.25rem;
+
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.95rem;
+      background: #fcfcfc;
+    }
+    input:focus { border-color: var(--c); }
+
+    .send-btn {
+      background: var(--a);
+      color: white;
+      border: none;
+      padding: 0 1.5rem;
+
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      text-transform: lowercase;
+      transition: background 0.2s;
+    }
+    .send-btn:hover { background: var(--c); }
+
+    .status-msg { text-align: center; color: var(--muted); font-size: 0.9rem; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">⚖️ mylawyer</div>
+    <button class="nav-btn" onclick="goBack()">back</button>
+  </nav>
+
+  <div class="container">
+    <header>
+      <h1 id="personName">loading</h1>
+    </header>
+
+    <div class="chat-card">
+      <div id="msg-list">
+        <div class="status-msg">connecting</div>
+      </div>
+
+      <div class="input-area">
+        <input type="text" id="msgInput" placeholder="Type a message" onkeypress="if(event.key==='Enter') send()">
+        <button class="send-btn" onclick="send()">send</button>
+        <button id="billBtn" class="nav-btn" style="background: var(--c); display: none;" onclick="askAmount()">bill client</button>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import {
+    collection,
+    addDoc,
+    query,
+    orderBy,
+    onSnapshot,
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp
+  }
+  from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+  
+let me, other, roomId, isLawyer = false;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = 'login.html'; return; }
+      me = user;
+
+      const uDoc = await getDoc(doc(db, 'users', user.uid));
+      isLawyer = uDoc.data()?.type === 'lawyer';
+
+      if (isLawyer) document.getElementById('billBtn').style.display = 'block';
+
+      const storageKey = isLawyer ? 'selectedClient' : 'selectedLawyer';
+      const storedData = localStorage.getItem(storageKey);
+      if (!storedData) { window.location.href = isLawyer ? 'lawyer-chats.html' : 'my-chats.html'; return; }
+      
+      other = JSON.parse(storedData);
+      document.getElementById('personName').innerText = other.name.toLowerCase();
+      roomId = [me.uid, other.id].sort().join('_');
+      startChat();
+    });
+
+    function startChat() {
+      const q = query(collection(db, 'chats', roomId, 'messages'), orderBy('timestamp', 'asc'));
+      onSnapshot(q, (snap) => {
+        const list = document.getElementById('msg-list');
+        list.innerHTML = '';
+        snap.forEach(d => {
+          const m = d.data();
+          const div = document.createElement('div');
+          //payment
+          if (m.text && m.text.startsWith("PAYMENT_REQUEST:")) {
+            const amount = m.text.split(":")[1];
+            div.className = m.senderId === me.uid ? "msg sent" : "msg received";
+            
+            if (m.senderId === me.uid) {
+                div.innerHTML = `<i>Sent invoice for ${amount}</i>`;
+            } else {
+                div.innerHTML = `
+                  <div class="payment-bubble">
+                    <p style="margin-bottom: 10px; font-weight: bold; color: var(--a)">Legal Fee: $${amount}</p>
+                    <stripe-buy-button
+                      buy-button-id="buy_btn_1SrkJV1vr01tb702ZQJV2kBg"
+                      publishable-key="pk_live_51SrfgE1vr01tb7024o7EzpnIdoPo3VmKKvm8lcWZqqwCLRuhf6DWd1cILoOjdEscjCrKokgvWxaF9UdCnFmBAVDB00IZ0gtqO8"
+                    ></stripe-buy-button>
+                  </div>`;
+            }
+          } else {
+            div.className = `msg ${m.senderId === me.uid ? 'sent' : 'received'}`;
+            div.innerText = m.text;
+          }
+          list.appendChild(div);
+        });
+        list.scrollTop = list.scrollHeight;
+      });
+    }
+
+    document.getElementById('billBtn').onclick = async () => {
+      const amount = prompt("bill amount :");
+      if (!amount || isNaN(amount)) return;
+      try {
+        const res = await fetch('https://us-central1-mylawyer-dfe9d.cloudfunctions.net/createPaymentIntent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: parseFloat(amount) })
+        });
+        const { clientSecret } = await res.json();
+        await addDoc(collection(db, 'chats', roomId, 'messages'), {
+          text: `PAYMENT_REQUEST:${amount}:${clientSecret}`,
+          senderId: me.uid,
+          timestamp: serverTimestamp()
+        });
+        await setDoc(doc(db, 'chats', roomId), {
+          lastMessage: `PAYMENT_REQUEST:${amount}:${clientSecret}`,
+          lastSenderId: me.uid,
+          lastUpdate: serverTimestamp(),
+          participants: [me.uid, other.id]
+        }, { merge: true });
+      } catch (e) {
+        // test 
+        alert('Cant send invoice make sure the payment server is running');
+      }
+    };
+
+    window.send = async () => {
+      const input = document.getElementById('msgInput');
+      const txt = input.value.trim();
+      if (!txt) return;
+      input.value = '';
+      await addDoc(collection(db, 'chats', roomId, 'messages'), {
+        text: txt, senderId: me.uid, timestamp: serverTimestamp()
+      });
+      await setDoc(doc(db, 'chats', roomId), {
+        lastMessage: txt, lastSenderId: me.uid, lastUpdate: serverTimestamp(), participants: [me.uid, other.id]
+      }, { merge: true });
+    };
+
+    window.goBack = () => { window.location.href = isLawyer ? 'lawyer-chats.html' : 'my-chats.html'; };
+ 
+
+</script>
+</body>
+</html>

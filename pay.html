@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Payment | MyLawyer</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    :root {
+      --a: #1e293b;
+      --b: #334155;
+      --c: #4f46e5;
+      --muted: #94a3b8;
+      --light: #f1f5f9;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #f8fafc;
+      color: var(--a);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    nav {
+      background: var(--a);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+    .logo { font-size: 1.25rem; font-weight: 700; text-transform: lowercase; }
+    .nav-btn {
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .container {
+      max-width: 480px;
+      width: 100%;
+      margin: 3rem auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .amount-display {
+      background: var(--a);
+      color: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .amount-display .label { font-size: 0.75rem; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.25rem; }
+    .amount-display .amount { font-size: 2rem; font-weight: 700; }
+    #payment-element { margin-bottom: 1.5rem; }
+    #pay-btn {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--c);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #pay-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    #error-msg {
+      color: #991b1b;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    #success-msg {
+      color: #166534;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 1rem;
+      border-radius: 6px;
+      text-align: center;
+      display: none;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">⚖️ mylawyer</div>
+    <button class="nav-btn" onclick="history.back()">back</button>
+  </nav>
+
+  <div class="container">
+    <div class="card">
+      <div class="amount-display">
+        <div class="label">amount due</div>
+        <div class="amount" id="amountDisplay">loading</div>
+      </div>
+
+      <div id="payment-element"></div>
+      <button id="pay-btn">pay now</button>
+      <div id="error-msg"></div>
+      <div id="success-msg"> Payment successful</div>
+    </div>
+  </div>
+
+  <script>
+    const stripe = Stripe('pk_live_51SrfgE1vr01tb7024o7EzpnIdoPo3VmKKvm8lcWZqqwCLRuhf6DWd1cILoOjdEscjCrKokgvWxaF9UdCnFmBAVDB00IZ0gtqO8');
+
+    const params = new URLSearchParams(window.location.search);
+    const clientSecret = params.get('secret');
+
+    const payBtn = document.getElementById('pay-btn');
+    payBtn.style.display = 'none'; // hide until element is ready
+
+    if (!clientSecret) {
+      document.getElementById('amountDisplay').textContent = 'invalid link';
+    } else {
+      // extract amount from clientSecret prefix (pi_XXX_secret_XXX -> amount shown from chat)
+      const amountFromUrl = params.get('amount');
+      document.getElementById('amountDisplay').textContent = amountFromUrl ? '£' + parseFloat(amountFromUrl).toFixed(2) : 'see invoice in chat';
+
+      const elements = stripe.elements({
+        clientSecret,
+        appearance: { theme: 'stripe' }
+      });
+
+      const paymentElement = elements.create('payment');
+      paymentElement.mount('#payment-element');
+
+      // show pay button only after element is ready
+      paymentElement.on('ready', () => {
+        payBtn.style.display = 'block';
+      });
+
+      payBtn.addEventListener('click', async () => {
+        payBtn.disabled = true;
+        payBtn.textContent = 'processing...';
+        document.getElementById('error-msg').style.display = 'none';
+
+        const { error, paymentIntent } = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: window.location.href
+          },
+          redirect: 'if_required'
+        });
+
+        if (error) {
+          document.getElementById('error-msg').textContent = error.message;
+          document.getElementById('error-msg').style.display = 'block';
+          payBtn.disabled = false;
+          payBtn.textContent = 'pay now';
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+          document.getElementById('success-msg').style.display = 'block';
+          payBtn.style.display = 'none';
+          document.getElementById('payment-element').style.display = 'none';
+          document.getElementById('amountDisplay').textContent = '✅ paid';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
