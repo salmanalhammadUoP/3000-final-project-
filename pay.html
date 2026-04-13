@@ -120,17 +120,17 @@
 
   <script>
     const stripe = Stripe('pk_live_51SrfgE1vr01tb7024o7EzpnIdoPo3VmKKvm8lcWZqqwCLRuhf6DWd1cILoOjdEscjCrKokgvWxaF9UdCnFmBAVDB00IZ0gtqO8');
-
+//stripe url paarameteres
     const params = new URLSearchParams(window.location.search);
     const clientSecret = params.get('secret');
 
     const payBtn = document.getElementById('pay-btn');
-    payBtn.style.display = 'none'; // hide until element is ready
-
+    payBtn.style.display = 'none'; 
+ //validation    
     if (!clientSecret) {
       document.getElementById('amountDisplay').textContent = 'invalid link';
     } else {
-      // extract amount from clientSecret prefix (pi_XXX_secret_XXX -> amount shown from chat)
+ // get amount      
       const amountFromUrl = params.get('amount');
       document.getElementById('amountDisplay').textContent = amountFromUrl ? '£' + parseFloat(amountFromUrl).toFixed(2) : 'see invoice in chat';
 
@@ -138,20 +138,20 @@
         clientSecret,
         appearance: { theme: 'stripe' }
       });
-
+// creates the payments field
       const paymentElement = elements.create('payment');
       paymentElement.mount('#payment-element');
 
-      // show pay button only after element is ready
+//show pay btn when ready
       paymentElement.on('ready', () => {
         payBtn.style.display = 'block';
       });
-
+//handles submit
       payBtn.addEventListener('click', async () => {
         payBtn.disabled = true;
         payBtn.textContent = 'processing...';
         document.getElementById('error-msg').style.display = 'none';
-
+//confim payment
         const { error, paymentIntent } = await stripe.confirmPayment({
           elements,
           confirmParams: {
@@ -159,17 +159,19 @@
           },
           redirect: 'if_required'
         });
-
+//after payment
         if (error) {
+          //declined
           document.getElementById('error-msg').textContent = error.message;
           document.getElementById('error-msg').style.display = 'block';
           payBtn.disabled = false;
           payBtn.textContent = 'pay now';
         } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+          //sucess
           document.getElementById('success-msg').style.display = 'block';
           payBtn.style.display = 'none';
           document.getElementById('payment-element').style.display = 'none';
-          document.getElementById('amountDisplay').textContent = '✅ paid';
+          document.getElementById('amountDisplay').textContent = ' paid';
         }
       });
     }

@@ -131,7 +131,7 @@
     </header>
 
     <div id="list" class="chat-list">
-      <div class="status-msg">loading...</div>
+      <div class="status-msg">loading</div>
     </div>
   </div>
 
@@ -139,36 +139,40 @@
     import { auth, db } from './js/firebase.js';
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { collection, query, where, onSnapshot, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
+//auth
     onAuthStateChanged(auth, (user) => {
       if (user) loadInbox(user.uid);
       else window.location.href = 'login.html';
     });
-
+//sync
     async function loadInbox(myId) {
+      //look for the id
       const q = query(collection(db, 'chats'), where('participants', 'array-contains', myId));
-
+//newmsgs 
       onSnapshot(q, async (snap) => {
         const container = document.getElementById('list');
         if (snap.empty) {
           container.innerHTML = '<div class="status-msg">no conversations yet.</div>';
           return;
         }
-
+//since stores id need to get names
         const chatPromises = snap.docs.map(async (d) => {
           const data = d.data();
+          //lawyer id
           const otherId = data.participants.find(id => id !== myId);
+          //lawyer profile
           const uSnap = await getDoc(doc(db, 'users', otherId));
           return { id: otherId, name: uSnap.exists() ? uSnap.data().name : 'lawyer', ...data };
         });
 
         const items = await Promise.all(chatPromises);
+        //update newest
         items.sort((a, b) => (b.lastUpdate?.seconds || 0) - (a.lastUpdate?.seconds || 0));
 
         container.innerHTML = items.map(item => {
           const isMe = item.lastSenderId === myId;
           const preview = item.lastMessage
-            ? (item.lastMessage.startsWith('PAYMENT_REQUEST:') ? '💳 payment request' : item.lastMessage)
+            ? (item.lastMessage.startsWith('PAYMENT_REQUEST:') ? ' payment request' : item.lastMessage)
             : 'new conversation';
           return `
             <div class="chat-card" onclick="openChat('${item.id}', '${item.name}')">

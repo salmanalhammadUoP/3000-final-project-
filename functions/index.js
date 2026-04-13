@@ -1,6 +1,5 @@
 const { onRequest } = require("firebase-functions/v2/https");
-const stripe = require("stripe")("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");
-
+//stripe key 
 exports.createPaymentIntent = onRequest({ cors: true }, async (req, res) => {
   try {
     const paymentIntent = await stripe.paymentIntents.create({
