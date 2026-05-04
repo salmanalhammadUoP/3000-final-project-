@@ -1,6 +1,9 @@
 my lawyer 
+
 a website that connects clients with legal professionals. 
+
 uses fire base, stripe, html, css, java script
+
 live on https://mylawyer-dfe9d.web.app
 
 features 
